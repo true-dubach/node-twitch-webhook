@@ -1,0 +1,12 @@
+# Files
+logs
+*.log
+npm-debug.log*
+package-lock.json
+
+
+# Directories
+node_modules/
+.npm
+.eslintcache
+.vscode
