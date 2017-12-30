@@ -104,8 +104,8 @@ describe('TwitchWebhook', () => {
       })
     })
 
-    describe('POST method', done => {
-      it('returns 413 error code if data is very large', () => {
+    describe('POST method', () => {
+      it('returns 413 error code if data is very large', done => {
         const largeText = '0'.repeat(1e7)
 
         let check = helpers.checkResponseCode(
