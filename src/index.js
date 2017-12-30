@@ -230,7 +230,7 @@ class TwitchWebhook extends EventEmitter {
         break
       case 'unsubscribe':
         delete this._secrets[queries['hub.topic']] // Yes, it's needed by design
-      case "subscribe": // eslint-disable-line
+      case 'subscribe': // eslint-disable-line
         response.writeHead(200, { 'Content-Type': 'text/plain' })
         response.end(queries['hub.challenge'])
 
