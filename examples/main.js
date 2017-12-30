@@ -1,4 +1,4 @@
-const TwitchWebhook = require('../src');
+const TwitchWebhook = require('twitch-webhook');
 
 const client_id = process.env.CLIENT_ID;
 if (!client_id) {

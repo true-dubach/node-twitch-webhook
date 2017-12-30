@@ -4,15 +4,16 @@
 
 Install with NPM:
 
-`npm install --save twitch-helix-webhook`
+`npm install --save twitch-webhook`
 
 ## Usage
 
 ```
-const TwitchWebhook = require('twitch-helix-webhook');
+const TwitchWebhook = require('twitch-webhook');
 
 const twitchWebhook = new TwitchWebhook({
     client_id: 'Your Twitch Client ID',
+    callback: 'Your Callback URL'
     secret: 'It\'s a secret'
 })
 
@@ -21,6 +22,10 @@ twitchWebhook.on('streams', (obj) => {
 });
 
 twitchWebhook.on('users/follows', (obj) => {
+    console.log(obj);
+})
+
+twitchWebhook.on('*', (obj) => {
     console.log(obj);
 })
 

@@ -22,7 +22,7 @@
   "author": "DaniilShev <daniilshev@outlook.com>",
   "license": "MIT",
   "dependencies": {
-    "bl": "^1.2.1",
+    "bluebird": "^3.5.1",
     "is-absolute-url": "^2.1.0",
     "querystring": "^0.2.0",
     "request": "^2.83.0",

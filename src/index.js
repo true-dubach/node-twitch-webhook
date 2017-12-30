@@ -5,7 +5,6 @@ const request = require('request-promise');
 const url = require('url');
 const http = require('http');
 const qs = require('querystring');
-const bl = require('bl');
 const Promise = require('bluebird');
 const isAbsoluteUrl = require('is-absolute-url');
 
