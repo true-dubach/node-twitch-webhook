@@ -17,8 +17,8 @@ class TwitchWebhook extends EventEmitter {
    * Constructs an instance of TwitchWebHookAPI
    *
    * @param {Object} options - Options
-   * @param {string} options.CLIENT_ID - Client ID required for Twitch API calls
-   * @param {string} options.CALLBACK - URL where notifications
+   * @param {string} options.client_id - Client ID required for Twitch API calls
+   * @param {string} options.callback - URL where notifications
    * will be delivered.
    * @param {string} [options.secret] - Secret used to sign
    * notification payloads.
@@ -33,11 +33,11 @@ class TwitchWebhook extends EventEmitter {
    * @param {string} [options.baseApiUrl="https://api.twitch.tv/helix/"] - Base Twitch API URL. It needs for proxying and testing
    */
   constructor (options = {}) {
-    if (options.CLIENT_ID === undefined) {
+    if (options.client_id === undefined) {
       throw new errors.FatalError('Twitch Client ID not provided!')
     }
 
-    if (options.CALLBACK === undefined) {
+    if (options.callback === undefined) {
       throw new errors.FatalError('Callback URL not provided!')
     }
 
@@ -151,10 +151,10 @@ class TwitchWebhook extends EventEmitter {
     let requestOptions = {}
     requestOptions.url = this._hubUrl
     requestOptions.headers = {
-      'Client-ID': this._options.CLIENT_ID
+      'Client-ID': this._options.client_id
     }
     requestOptions.qs = {
-      'hub.callback': this._options.CALLBACK,
+      'hub.callback': this._options.callback,
       'hub.mode': mode,
       'hub.topic': topic,
       'hub.lease_seconds': this._options.lease_seconds
