@@ -3,10 +3,11 @@
     "mocha": true,
     "node": true
   },
-  "plugins": [
-    "mocha"
-  ],
+  "plugins": ["mocha"],
   "rules": {
     "mocha/no-exclusive-tests": "error"
+  },
+  "parserOptions": {
+    "ecmaVersion": 6
   }
 }

@@ -1,21 +1,21 @@
-const TwitchWebhook = require('../src/index');
-const errors = require('../src/errors');
-const helpers = require('./helpers');
-const assert = require('assert');
-const Promise = require('bluebird');
-const request = require('request-promise');
+const TwitchWebhook = require("../src/index");
+const errors = require("../src/errors");
+const helpers = require("./helpers");
+const assert = require("assert");
+const Promise = require("bluebird");
+const request = require("request-promise");
 
 const client_id = process.env.CLIENT_ID;
 if (!client_id) {
-  throw new Error('Twitch Client ID not provided');
+  throw new Error("Twitch Client ID not provided");
 }
-const callback = process.env.CALLBACK || 'https://216.58.210.174/'; // Google IP :)
+const callback = process.env.CALLBACK || "https://216.58.210.174/"; // Google IP :)
 
 const port = process.env.PORT || 9108;
 const freePort = port + 1;
 const timeout = 10 * 1000;
 
-describe('TwitchWebhook', () => {
+describe("TwitchWebhook", () => {
   let twitchWebhook;
   let offlineWebhook;
 
@@ -24,7 +24,7 @@ describe('TwitchWebhook', () => {
       client_id,
       callback,
       listen: {
-        host: '127.0.0.1',
+        host: "127.0.0.1",
         port,
         autoStart: true,
       },
@@ -34,55 +34,67 @@ describe('TwitchWebhook', () => {
       client_id,
       callback,
       listen: {
-        host: '127.0.0.1',
+        host: "127.0.0.1",
         port: freePort,
       },
     });
   });
 
-  it('should automaticaly starts listening', () => {
+  it("should automaticaly starts listening", () => {
     assert.equal(twitchWebhook.isListening(), true);
     return helpers.hasStartedListening(`http://127.0.0.1:${port}`);
   });
 
-  it('should does not automaticaly start listening if "autoStart" is false', () => {    
+  it('should does not automaticaly start listening if "autoStart" is false', () => {
     assert.equal(offlineWebhook.isListening(), false);
     return helpers.hasStoppedListening(`http://127.0.0.1:${freePort}`);
   });
 
-  describe('webhook', () => {
-    describe('GET method', () => {
-      it('returns 400 error code if the request is malformed', () => {
-        return helpers.checkResponseCode({
-          url: `http://127.0.0.1:${port}`,
-        }, 400);
+  describe("webhook", () => {
+    describe("GET method", () => {
+      it("returns 400 error code if the request is malformed", () => {
+        return helpers.checkResponseCode(
+          {
+            url: `http://127.0.0.1:${port}`,
+          },
+          400
+        );
       });
 
-      it('returns 200 response code if the denied request was received', () => {
-        return helpers.checkResponseCode({
-          url: `http://127.0.0.1:${port}`,
-          qs: {
-            'hub.mode': 'denied',
-            'hub.topic': 'https://api.twitch.tv/helix/users/follows?to_id=1337',
-            'hub.reason': 'unauthorized',
+      it("returns 200 response code if the denied request was received", () => {
+        return helpers.checkResponseCode(
+          {
+            url: `http://127.0.0.1:${port}`,
+            qs: {
+              "hub.mode": "denied",
+              "hub.topic":
+                "https://api.twitch.tv/helix/users/follows?to_id=1337",
+              "hub.reason": "unauthorized",
+            },
           },
-        }, 200);
+          200
+        );
       });
 
       it('returns 200 response code and "hub.challenge" if the subscribe or unsubscribe request was received', () => {
-        const modes = ['subscribe', 'unsubscribe'];
-  
-        return Promise.each(modes, (mode) => {  
-          return helpers.checkResponseCode({
-            url: `http://127.0.0.1:${port}`,
-            qs: {
-              'hub.mode': mode,
-              'hub.topic': 'https://api.twitch.tv/helix/users/follows?to_id=1337',
-              'hub.lease_seconds': 864000,
-              'hub.challenge': 'HzSGH_h04Cgl6VbDJm7IyXSNSlrhaLvBi9eft3bw',
-            },
-          }, 200)
-            .then((response) => {
+        const modes = ["subscribe", "unsubscribe"];
+
+        return Promise.each(modes, mode => {
+          return helpers
+            .checkResponseCode(
+              {
+                url: `http://127.0.0.1:${port}`,
+                qs: {
+                  "hub.mode": mode,
+                  "hub.topic":
+                    "https://api.twitch.tv/helix/users/follows?to_id=1337",
+                  "hub.lease_seconds": 864000,
+                  "hub.challenge": "HzSGH_h04Cgl6VbDJm7IyXSNSlrhaLvBi9eft3bw",
+                },
+              },
+              200
+            )
+            .then(response => {
               if (!response.body) {
                 throw new Error('expeced "hub.challenge"');
               }
@@ -91,118 +103,133 @@ describe('TwitchWebhook', () => {
       });
     });
 
-    describe('POST method', () => {
-      it('returns 413 error code if data is very large', () => {
+    describe("POST method", () => {
+      it("returns 413 error code if data is very large", () => {
         const largeText = "0".repeat(1e7);
 
-        return helpers.checkResponseCode({
-          url: `http://127.0.0.1:${port}`,
-          method: 'POST',
-          body: largeText,
-        }, 413);
+        return helpers.checkResponseCode(
+          {
+            url: `http://127.0.0.1:${port}`,
+            method: "POST",
+            body: largeText,
+          },
+          413
+        );
       });
 
-      it('returns 400 error code if json is malformed', function () {
+      it("returns 400 error code if json is malformed", function() {
         this.timeout(timeout);
 
-        return helpers.checkResponseCode({
-          url: `http://127.0.0.1:${port}`,
-          method: 'POST',
-          body: 'text,',
-        }, 400);
-      });
-
-      it('returns 400 error code if topic is missed', () => {
-        return helpers.checkResponseCode({
-          url: `http://127.0.0.1:${port}`,
-          method: 'POST',
-        }, 400);
-      });
-
-      it('returns 204 response code if all is ok', () => {
-        return helpers.checkResponseCode({
-          url: `http://127.0.0.1:${port}`,
-          method: 'POST',
-          json: {
-            topic: 'https://api.twitch.tv/helix/users/follows?to_id=1337',
+        return helpers.checkResponseCode(
+          {
+            url: `http://127.0.0.1:${port}`,
+            method: "POST",
+            body: "text,",
           },
-        }, 204);
+          400
+        );
+      });
+
+      it("returns 400 error code if topic is missed", () => {
+        return helpers.checkResponseCode(
+          {
+            url: `http://127.0.0.1:${port}`,
+            method: "POST",
+          },
+          400
+        );
+      });
+
+      it("returns 204 response code if all is ok", () => {
+        return helpers.checkResponseCode(
+          {
+            url: `http://127.0.0.1:${port}`,
+            method: "POST",
+            json: {
+              topic: "https://api.twitch.tv/helix/users/follows?to_id=1337",
+            },
+          },
+          204
+        );
       });
     });
 
-    it('only accepts POST and GET methods', () => {
-      const methods = ['PUT', 'DELETE', 'OPTIONS'];
-      
-      return Promise.each(methods, (method) => {         
-        return helpers.checkResponseCode({
-          url: `http://127.0.0.1:${port}`,
-          method,
-        }, 405);
+    it("only accepts POST and GET methods", () => {
+      const methods = ["PUT", "DELETE", "OPTIONS"];
+
+      return Promise.each(methods, method => {
+        return helpers.checkResponseCode(
+          {
+            url: `http://127.0.0.1:${port}`,
+            method,
+          },
+          405
+        );
       });
     });
   });
 
-  describe('#listen', () => {
+  describe("#listen", () => {
     afterEach(() => offlineWebhook.close());
 
-    it('should throwns FatalError if the listener is already running', () => {
-      return twitchWebhook.listen(freePort)
-        .catch((err) => {
-          assert(err instanceof errors.FatalError);
-        });        
+    it("should throwns FatalError if the listener is already running", () => {
+      return twitchWebhook.listen(freePort).catch(err => {
+        assert(err instanceof errors.FatalError);
+      });
     });
 
-    it('starts listening with defined port and host', () => {
+    it("starts listening with defined port and host", () => {
       return offlineWebhook.listen();
     });
 
-    it('starts listening with options', () => {
+    it("starts listening with options", () => {
       return offlineWebhook.listen(freePort);
     });
   });
 
-  describe.skip('#close', () => {});
+  describe.skip("#close", () => {});
 
-  describe('#isListening', () => {  
-    it('returns true if listeining is started', () => {
+  describe("#isListening", () => {
+    it("returns true if listeining is started", () => {
       assert.equal(twitchWebhook.isListening(), true);
       return helpers.hasStartedListening(`http://127.0.0.1:${port}`);
     });
 
-    it('returns false if listeining is not started', () => {
+    it("returns false if listeining is not started", () => {
       assert.equal(offlineWebhook.isListening(), false);
       return helpers.hasStoppedListening(`http://127.0.0.1:${freePort}`);
     });
   });
 
-  describe.skip('#subscribe', () => {});
+  describe.skip("#subscribe", () => {});
 
-  describe('#unsubscribe', () => {
-    it('should throwns FatalError if the request is bad', function () {
+  describe("#unsubscribe", () => {
+    it("should throwns FatalError if the request is bad", function() {
       this.timeout(timeout);
 
-      return twitchWebhook.unsubscribe('streams')
-        .catch((err) => {
-          assert(err instanceof errors.FatalError);
-        });        
-    });
-
-    it('should throwns RequestDenied if request is denied', function () {
-      this.timeout(timeout);
-
-      return twitchWebhook.unsubscribe('streams', {
-        user_id: 123
-      }).catch((err) => {
-        assert(err instanceof errors.RequestDenied)
+      return twitchWebhook.unsubscribe("streams").catch(err => {
+        assert(err instanceof errors.FatalError);
       });
     });
 
-    it('should return nothing if everything is ok', function () {
+    it("should throwns RequestDenied if request is denied", function() {
       this.timeout(timeout);
 
-      return twitchWebhook.unsubscribe('streams', {
-        user_id: 123
-      })
+      return twitchWebhook
+        .unsubscribe("streams", {
+          user_id: 123,
+        })
+        .catch(err => {
+          assert(err instanceof errors.RequestDenied);
+        });
+    });
+
+    it("should return nothing if everything is ok", function() {
+      this.timeout(timeout);
+
+      return twitchWebhook.unsubscribe("streams", {
+        user_id: 123,
+      });
     });
   });
 

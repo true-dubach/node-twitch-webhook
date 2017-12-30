@@ -1,8 +1,9 @@
-'use strict';
+"use strict";
+
 class FatalError extends Error {
   /**
-   * 
-   * @param {string|Error} error 
+   *
+   * @param {string|Error} error
    */
   constructor(error) {
     if (error instanceof Error) {
@@ -13,21 +14,21 @@ class FatalError extends Error {
       Error.captureStackTrace(this);
     }
   }
-};
+}
 
 class RequestDenied extends FatalError {
   /**
-   * 
-   * @param {Object} response 
+   *
+   * @param {Object} response
    */
   constructor(response) {
     super(`Invalid response status code ${response.statusCode}`);
 
     this.response = response;
   }
-};
+}
 
 module.exports = {
   FatalError,
-  RequestDenied
-}
+  RequestDenied,
+};
