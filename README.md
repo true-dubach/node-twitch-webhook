@@ -1,5 +1,8 @@
 # Node.js Twitch Helix Webhooks
 
+[![Build Status](https://travis-ci.org/k-egor-smirnov/node-twitch-webhook.svg?branch=master)](https://travis-ci.org/k-egor-smirnov/node-twitch-webhook)
+[![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
+
 ## Installation
 
 Install with NPM:
