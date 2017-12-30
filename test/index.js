@@ -120,7 +120,7 @@ describe('TwitchWebhook', () => {
         check.then(response => {
           assert.equal(
             response.statusCode,
-            requiredCode,
+            413,
             `unexpected status code: ${response.statusCode}`
           )
 
