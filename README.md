@@ -2,6 +2,10 @@
 
 [![Build Status](https://travis-ci.org/k-egor-smirnov/node-twitch-webhook.svg?branch=master)](https://travis-ci.org/k-egor-smirnov/node-twitch-webhook)
 [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
+[![dependencies Status](https://david-dm.org/k-egor-smirnov/node-twitch-webhook/status.svg)](https://david-dm.org/k-egor-smirnov/node-twitch-webhook)
+[![devDependencies Status](https://david-dm.org/k-egor-smirnov/node-twitch-webhook/dev-status.svg)](https://david-dm.org/k-egor-smirnov/node-twitch-webhook?type=dev)
+[![Node version](https://img.shields.io/node/v/twitch-webhook.svg?style=flat)](http://nodejs.org/download/)
+[![https://nodei.co/npm/twitch-webhook.png?downloads=true&downloadRank=true&stars=true](https://nodei.co/npm/YOUR-MODULE-NAME.png?downloads=true&downloadRank=true&stars=true)](https://www.npmjs.com/package/twitch-webhook)
 
 ## Installation
 
