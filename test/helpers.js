@@ -6,15 +6,7 @@ function checkResponseCode (requestOptions, requiredCode) {
   requestOptions.resolveWithFullResponse = true
   requestOptions.simple = false
 
-  return request(requestOptions).then(response => {
-    assert.equal(
-      response.statusCode,
-      requiredCode,
-      `unexpected status code: ${response.statusCode}`
-    )
-
-    return response
-  })
+  return request(requestOptions)
 }
 
 function hasStartedListening (url) {

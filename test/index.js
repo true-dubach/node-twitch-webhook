@@ -104,18 +104,30 @@ describe('TwitchWebhook', () => {
       })
     })
 
-    describe('POST method', () => {
+    describe('POST method', done => {
       it('returns 413 error code if data is very large', () => {
         const largeText = '0'.repeat(1e7)
 
-        return helpers.checkResponseCode(
+        let check = helpers.checkResponseCode(
           {
-            url: `http://${CALLBACK}:${port}`,
+            url: `http://127.0.0.1:${port}`,
             method: 'POST',
             body: largeText
           },
           413
         )
+
+        check.then(response => {
+          assert.equal(
+            response.statusCode,
+            requiredCode,
+            `unexpected status code: ${response.statusCode}`
+          )
+
+          done()
+        })
+
+        return check
       })
 
       it('returns 400 error code if json is malformed', function () {
