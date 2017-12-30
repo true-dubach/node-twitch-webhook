@@ -24,8 +24,8 @@ describe('TwitchWebhook', () => {
 
   before(() => {
     twitchWebhook = new TwitchWebhook({
-      CLIENT_ID,
-      CALLBACK,
+      client_id: CLIENT_ID,
+      callback: CALLBACK,
       listen: {
         host: '127.0.0.1',
         port,

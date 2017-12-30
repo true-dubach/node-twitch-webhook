@@ -33,11 +33,11 @@ class TwitchWebhook extends EventEmitter {
    * @param {string} [options.baseApiUrl="https://api.twitch.tv/helix/"] - Base Twitch API URL. It needs for proxying and testing
    */
   constructor (options = {}) {
-    if (options.client_id === undefined) {
+    if (!options.client_id) {
       throw new errors.FatalError('Twitch Client ID not provided!')
     }
 
-    if (options.callback === undefined) {
+    if (!options.callback) {
       throw new errors.FatalError('Callback URL not provided!')
     }
 
