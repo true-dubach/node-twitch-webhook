@@ -30,7 +30,7 @@ class TwitchWebhook extends EventEmitter {
    * @param {number} [options.listen.port=8443] - Port to bind to
    * @param {boolean|Object} [options.https=false] - Should use https connection.
    * If yes, these options to be passed to `https.createServer()`.
-   * @param {string} [options.baseApiUrl="https://api.twitch.tv/helix/"] - Base Twitch API URL. It needs for proxying and testing
+   * @param {string} [options.baseApiUrl="https://api.twitch.tv/helix/"] - Base Twitch API URL. Needed proxying and testing
    */
   constructor (options = {}) {
     if (!options.client_id) {
@@ -122,7 +122,7 @@ class TwitchWebhook extends EventEmitter {
   }
 
   /**
-   * Checks if server is listening for connections.
+   * Check if server is listening for connections.
    *
    * @return {boolean}
    */
@@ -131,7 +131,7 @@ class TwitchWebhook extends EventEmitter {
   }
 
   /**
-   * Makes request
+   * Make request
    *
    * @private
    * @param {string} mode - URL for the topic to subscribe to or
@@ -186,7 +186,7 @@ class TwitchWebhook extends EventEmitter {
   }
 
   /**
-   * Subscribes to specific topic
+   * Subscribe to specific topic
    *
    * @param {string} topic - Topic name
    * @param {Object} options - Topic options
@@ -196,7 +196,7 @@ class TwitchWebhook extends EventEmitter {
   }
 
   /**
-   * Unsubscribes from specific topic
+   * Unsubscribe from specific topic
    *
    * @param {string} topic - Topic name
    */
@@ -205,7 +205,7 @@ class TwitchWebhook extends EventEmitter {
   }
 
   /**
-   * Returns errors
+   * Return errors
    */
   get errors () {
     return errors
@@ -243,7 +243,7 @@ class TwitchWebhook extends EventEmitter {
   }
 
   /**
-   * Fixes fields with date in response
+   * Fix fields with date in response
    *
    * @private
    * @param {string} topic - Topic name
