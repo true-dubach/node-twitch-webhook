@@ -13,7 +13,7 @@ function checkResponseCode (requestOptions, requiredCode) {
       `unexpected status code: ${response.statusCode}`
     )
 
-    return assert
+    return response
   })
 }
 
