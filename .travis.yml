@@ -2,3 +2,14 @@ language: node_js
 node_js:
   - "8"
   - "6"
+cache:
+  directories:
+    - "node_modules"
+after_success: jsdoc src
+deploy:
+  provider: pages
+  skip_cleanup: true
+  github_token: $GITHUB_TOKEN
+  local_dir: ${TRAVIS_BUILD_DIR}/out
+  on:
+    branch: master  
