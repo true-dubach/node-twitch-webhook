@@ -42,12 +42,12 @@ describe('TwitchWebhook', () => {
     })
   })
 
-  it('should automaticaly starts listening', () => {
+  it('should automaticaly start listening by default', () => {
     assert.equal(twitchWebhook.isListening(), true)
     return helpers.hasStartedListening(`http://127.0.0.1:${port}`)
   })
 
-  it('should does not automaticaly start listening if "autoStart" is false', () => {
+  it('should not automaticaly start listening if "autoStart" is false', () => {
     assert.equal(offlineWebhook.isListening(), false)
     return helpers.hasStoppedListening(`http://127.0.0.1:${freePort}`)
   })
@@ -63,7 +63,7 @@ describe('TwitchWebhook', () => {
         )
       })
 
-      it('returns 200 response code if the denied request was received', () => {
+      it('returns 200 response code if request with denied status was received', () => {
         return helpers.checkResponseCode(
           {
             url: `http://127.0.0.1:${port}`,
@@ -132,7 +132,7 @@ describe('TwitchWebhook', () => {
         )
       })
 
-      it('returns 400 error code if topic is missed', () => {
+      it('returns 400 error code if topic is missing', () => {
         return helpers.checkResponseCode(
           {
             url: `http://127.0.0.1:${port}`,
@@ -142,7 +142,7 @@ describe('TwitchWebhook', () => {
         )
       })
 
-      it('returns 204 response code if all is ok', () => {
+      it('returns 204 response code if everything is ok', () => {
         return helpers.checkResponseCode(
           {
             url: `http://127.0.0.1:${port}`,
@@ -174,7 +174,7 @@ describe('TwitchWebhook', () => {
   describe('#listen', () => {
     afterEach(() => offlineWebhook.close())
 
-    it('should throwns FatalError if the listener is already running', () => {
+    it('should throw FatalError if the listener is already running', () => {
       return twitchWebhook.listen(freePort).catch(err => {
         assert(err instanceof errors.FatalError)
       })
@@ -192,12 +192,12 @@ describe('TwitchWebhook', () => {
   describe.skip('#close', () => {})
 
   describe('#isListening', () => {
-    it('returns true if listeining is started', () => {
+    it('returns true if listening is started', () => {
       assert.equal(twitchWebhook.isListening(), true)
       return helpers.hasStartedListening(`http://127.0.0.1:${port}`)
     })
 
-    it('returns false if listeining is not started', () => {
+    it('returns false if listening is not started', () => {
       assert.equal(offlineWebhook.isListening(), false)
       return helpers.hasStoppedListening(`http://127.0.0.1:${freePort}`)
     })
@@ -206,7 +206,7 @@ describe('TwitchWebhook', () => {
   describe.skip('#subscribe', () => {})
 
   describe('#unsubscribe', () => {
-    it('should throwns FatalError if the request is bad', function () {
+    it('should throw FatalError if the request status is bad', function () {
       this.timeout(timeout)
 
       return twitchWebhook.unsubscribe('streams').catch(err => {
@@ -214,7 +214,7 @@ describe('TwitchWebhook', () => {
       })
     })
 
-    it('should throwns RequestDenied if request is denied', function () {
+    it('should throw RequestDenied if request status is denied', function () {
       this.timeout(timeout)
 
       return twitchWebhook

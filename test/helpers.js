@@ -20,7 +20,7 @@ function checkResponseCode (requestOptions, requiredCode) {
 function hasStartedListening (url) {
   return request.get(url).catch(response => {
     if (!response.statusCode || response.statusCode >= 500) {
-      throw new Error('listening did not start')
+      throw new Error('listening was not started')
     }
   })
 }
@@ -32,7 +32,7 @@ function hasStoppedListening (url) {
     .catch(response => response.error instanceof errors.RequestError)
     .finally(status => {
       if (status == false) {
-        throw new Error('starts listening when "listen" is false')
+        throw new Error('cannot start listening if "autoStart" is false')
       }
     })
 }
