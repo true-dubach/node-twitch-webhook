@@ -1,17 +1,18 @@
 {
   "name": "twitch-webhook",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A Node JS library for new Twitch Helix API Webhooks",
   "main": "index.js",
   "directories": {
     "test": "test"
   },
   "scripts": {
-    "test": "standard && mocha"
+    "test": "standard && mocha",
+    "coveralls": "istanbul cover _mocha --report lcovonly -- -R spec && cat ./coverage/lcov.info | coveralls && rm -rf ./coverage"
   },
   "repository": {
     "type": "git",
-    "url": "node-twitch-webhook"
+    "url": "git://github.com/true-dubach/node-twitch-webhook.git"
   },
   "keywords": [
     "node",
@@ -19,7 +20,14 @@
     "helix",
     "webhook"
   ],
-  "author": "DaniilShev <daniilshev@outlook.com>",
+  "maintainers": [
+    "Panishev Daniil <daniilshev@outlook.com>"
+  ],
+  "contributors": [
+    "Egor Smirnov <k.egor.smirnov@gmail.com>",
+    "Roman Nikonov <y.nikonov.roman@yandex.ru>"
+  ],
+  "author": "Panishev Daniil",
   "license": "MIT",
   "dependencies": {
     "bluebird": "^3.5.1",
@@ -29,9 +37,12 @@
     "request-promise": "^4.2.2"
   },
   "devDependencies": {
+    "coveralls": "^3.0.0",
     "eslint-plugin-mocha": "^4.11.0",
+    "istanbul": "^0.4.5",
     "jsdoc": "^3.5.5",
     "mocha": "^4.0.1",
+    "mocha-lcov-reporter": "^1.3.0",
     "standard": "^10.0.3"
   },
   "standard": {

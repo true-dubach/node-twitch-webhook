@@ -1,6 +1,7 @@
 # Node.js Twitch Helix Webhooks
 
 [![Build Status](https://travis-ci.org/true-dubach/node-twitch-webhook.svg?branch=master)](https://travis-ci.org/true-dubach/node-twitch-webhook)
+[![Coverage Status](https://coveralls.io/repos/github/true-dubach/node-twitch-webhook/badge.svg?branch=master)](https://coveralls.io/github/true-dubach/node-twitch-webhook?branch=master)
 [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 [![dependencies Status](https://david-dm.org/true-dubach/node-twitch-webhook/status.svg)](https://david-dm.org/true-dubach/node-twitch-webhook)
 [![devDependencies Status](https://david-dm.org/true-dubach/node-twitch-webhook/dev-status.svg)](https://david-dm.org/true-dubach/node-twitch-webhook?type=dev)

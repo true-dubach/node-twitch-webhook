@@ -5,7 +5,9 @@ node_js:
 cache:
   directories:
     - "node_modules"
-after_success: jsdoc src
+after_success: 
+  - npm run coveralls
+  - jsdoc src
 deploy:
   provider: pages
   skip_cleanup: true
