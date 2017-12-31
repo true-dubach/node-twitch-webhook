@@ -30,7 +30,7 @@ class TwitchWebhook extends EventEmitter {
    * @param {number} [options.listen.port=8443] - Port to bind to
    * @param {boolean|Object} [options.https=false] - Should use https connection.
    * If yes, these options to be passed to `https.createServer()`.
-   * @param {string} [options.baseApiUrl="https://api.twitch.tv/helix/"] - Base Twitch API URL. It needs for proxying and testing
+   * @param {string} [options.baseApiUrl="https://api.twitch.tv/helix/"] - Base Twitch API URL. Needed proxying and testing
    */
   constructor (options = {}) {
     if (!options.client_id) {
@@ -122,7 +122,7 @@ class TwitchWebhook extends EventEmitter {
   }
 
   /**
-   * Checks if server is listening for connections.
+   * Check if server is listening for connections.
    *
    * @return {boolean}
    */
@@ -131,7 +131,7 @@ class TwitchWebhook extends EventEmitter {
   }
 
   /**
-   * Makes request
+   * Make request
    *
    * @private
    * @param {string} mode - URL for the topic to subscribe to or
@@ -186,7 +186,7 @@ class TwitchWebhook extends EventEmitter {
   }
 
   /**
-   * Subscribes to specific topic
+   * Subscribe to specific topic
    *
    * @param {string} topic - Topic name
    * @param {Object} options - Topic options
@@ -196,16 +196,17 @@ class TwitchWebhook extends EventEmitter {
   }
 
   /**
-   * Unsubscribes from specific topic
+   * Unsubscribe from specific topic
    *
    * @param {string} topic - Topic name
+   * @return {Promise}
    */
   unsubscribe (topic, options = {}) {
     return this._request('unsubscribe', topic, options)
   }
 
   /**
-   * Returns errors
+   * Return errors
    */
   get errors () {
     return errors
@@ -243,7 +244,7 @@ class TwitchWebhook extends EventEmitter {
   }
 
   /**
-   * Fixes fields with date in response
+   * Fix fields with date in response
    *
    * @private
    * @param {string} topic - Topic name
@@ -278,7 +279,7 @@ class TwitchWebhook extends EventEmitter {
         request.headers['x-hub-signature'].split('=')[1]
 
       if (!signature) {
-        response.writeHead(401, { 'Content-Type': 'text/plain' })
+        response.writeHead(202, { 'Content-Type': 'text/plain' })
         response.end()
         return
       }
@@ -291,7 +292,7 @@ class TwitchWebhook extends EventEmitter {
       // Too much data, destroy the connection
       if (body.length > 1e6) {
         body = ''
-        response.writeHead(413, { 'Content-Type': 'text/plain' })
+        response.writeHead(202, { 'Content-Type': 'text/plain' })
         response.end()
         request.connection.destroy()
       }
@@ -300,9 +301,9 @@ class TwitchWebhook extends EventEmitter {
     request.on('end', () => {
       let data
       try {
-        data = JSON.parse('' + body)
+        data = JSON.parse(body)
       } catch (err) {
-        response.writeHead(400, { 'Content-Type': 'text/plain' })
+        response.writeHead(202, { 'Content-Type': 'text/plain' })
         response.end()
         return
       }
@@ -311,7 +312,7 @@ class TwitchWebhook extends EventEmitter {
       const topicName =
         topic && url.parse(topic).pathname.replace('/helix/', '')
       if (!topic || !topicName) {
-        response.writeHead(400, { 'Content-Type': 'text/plain' })
+        response.writeHead(202, { 'Content-Type': 'text/plain' })
         response.end()
         return
       }
@@ -323,13 +324,13 @@ class TwitchWebhook extends EventEmitter {
           .digest('hex')
 
         if (storedSign !== signature) {
-          response.writeHead(401, { 'Content-Type': 'text/plain' })
+          response.writeHead(202, { 'Content-Type': 'text/plain' })
           response.end()
           return
         }
       }
 
-      response.writeHead(204, { 'Content-Type': 'text/plain' })
+      response.writeHead(200, { 'Content-Type': 'text/plain' })
       response.end()
 
       let payload = {}
