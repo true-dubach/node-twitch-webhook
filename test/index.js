@@ -104,45 +104,41 @@ describe('TwitchWebhook', () => {
     })
 
     describe('POST method', () => {
-      it('returns 413 error code if data is very large', () => {
+      it('returns 202 response code if data is very large', () => {
         const largeText = '0'.repeat(1e7)
 
-        let check = helpers.checkResponseCode(
+        return helpers.checkResponseCode(
           {
             url: `http://127.0.0.1:${port}`,
             method: 'POST',
             body: largeText
           },
-          413
+          202
         )
-
-        return check
       })
 
-      it('returns 400 error code if json is malformed', function () {
-        this.timeout(timeout)
-
+      it('returns 202 response code if json is malformed', () => {
         return helpers.checkResponseCode(
           {
             url: `http://127.0.0.1:${port}`,
             method: 'POST',
             body: 'text,'
           },
-          400
+          202
         )
       })
 
-      it('returns 400 error code if topic is missed', () => {
+      it('returns 202 response code if topic is missed', () => {
         return helpers.checkResponseCode(
           {
             url: `http://127.0.0.1:${port}`,
             method: 'POST'
           },
-          400
+          202
         )
       })
 
-      it('returns 204 response code if all is ok', () => {
+      it('returns 200 response code if all is ok', () => {
         return helpers.checkResponseCode(
           {
             url: `http://127.0.0.1:${port}`,
@@ -151,7 +147,7 @@ describe('TwitchWebhook', () => {
               topic: 'https://api.twitch.tv/helix/users/follows?to_id=1337'
             }
           },
-          204
+          200
         )
       })
     })
