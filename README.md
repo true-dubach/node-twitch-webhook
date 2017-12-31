@@ -17,7 +17,7 @@ Install with NPM:
 ## Usage
 
 ```
-const TwitchWebhook = require('twitch-webhook');
+const TwitchWebhook = require('twitch-webhook')
 
 const twitchWebhook = new TwitchWebhook({
     client_id: 'Your Twitch Client ID',
@@ -26,15 +26,15 @@ const twitchWebhook = new TwitchWebhook({
 })
 
 twitchWebhook.on('streams', ({ topic, event }) => {
-    console.log(event);
+    console.log(event)
 })
 
 twitchWebhook.on('users/follows', ({ topic, event }) => {
-    console.log(event);
+    console.log(event)
 })
 
 twitchWebhook.on('*', ({ topic, event }) => {
-    console.log(event);
+    console.log(event)
 })
 
 twitchWebhook.subscribe('users/follows', {
