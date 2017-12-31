@@ -7,7 +7,7 @@
     "test": "test"
   },
   "scripts": {
-    "test": "mocha"
+    "test": "standard && mocha"
   },
   "repository": {
     "type": "git",
@@ -30,6 +30,17 @@
   },
   "devDependencies": {
     "eslint-plugin-mocha": "^4.11.0",
-    "mocha": "^4.0.1"
+    "jsdoc": "^3.5.5",
+    "mocha": "^4.0.1",
+    "standard": "^10.0.3"
+  },
+  "standard": {
+    "ignore": [
+      "node_modules",
+      "test"
+    ]
+  },
+  "engines": {
+    "node": ">=6.0.0"
   }
 }
