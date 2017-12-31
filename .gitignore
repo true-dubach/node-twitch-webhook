@@ -6,6 +6,7 @@ package-lock.json
 
 
 # Directories
+out
 node_modules/
 .npm
 .eslintcache

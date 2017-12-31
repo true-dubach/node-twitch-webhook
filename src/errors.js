@@ -1,5 +1,9 @@
 'use strict'
 
+/**
+ * Twitch error
+ * @extends Error
+ */
 class FatalError extends Error {
   /**
    *
@@ -16,6 +20,10 @@ class FatalError extends Error {
   }
 }
 
+/**
+ * Access error
+ * @extends FatalError
+ */
 class RequestDenied extends FatalError {
   /**
    *

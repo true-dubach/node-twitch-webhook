@@ -10,7 +10,7 @@ const Promise = require('bluebird')
 const isAbsoluteUrl = require('is-absolute-url')
 
 /**
- * TwitchWebHookAPI
+ * Twitch Webhook API
  */
 class TwitchWebhook extends EventEmitter {
   /**
