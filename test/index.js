@@ -5,18 +5,17 @@ const assert = require('assert')
 const Promise = require('bluebird')
 const request = require('request-promise')
 
-const {
-  CLIENT_ID: client_id,
-  CALLBACK: callback = 'https://216.58.210.174/',
-  PORT: port = 9108
-} = process.env
+const client_id = process.env.CLIENT_ID
 
 if (!client_id) {
   throw new Error('Twitch Client ID not provided')
 }
 
+const port = process.env.PORT || 9108
 const freePort = port + 1
 const timeout = 10 * 1000
+
+const callback = process.env.CALLBACK || 'https://216.58.210.174/'
 
 describe('TwitchWebhook', () => {
   let twitchWebhook
@@ -24,8 +23,8 @@ describe('TwitchWebhook', () => {
 
   before(() => {
     twitchWebhook = new TwitchWebhook({
-      client_id: client_id,
-      callback: CALLBACK,
+      client_id,
+      callback,
       listen: {
         host: '127.0.0.1',
         port,
@@ -34,8 +33,8 @@ describe('TwitchWebhook', () => {
     })
 
     offlineWebhook = new TwitchWebhook({
-      client_id: client_id,
-      callback: CALLBACK,
+      client_id,
+      callback,
       listen: {
         host: '127.0.0.1',
         port: freePort
