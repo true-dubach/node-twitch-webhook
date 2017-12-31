@@ -11,15 +11,15 @@ if (!CALLBACK) {
 }
 
 const twitchWebhook = new TwitchWebhook({
-  CLIENT_ID,
-  CALLBACK,
+  client_id: CLIENT_ID,
+  callback: CALLBACK,
   secret: 'hello human Kappa',
   listen: {
     autoStart: true
   }
 })
 
-twitchWebhook.on('*', ({ event }) => {
+twitchWebhook.on('*', ({ topic, event }) => {
   console.log(event)
 })
 

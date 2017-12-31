@@ -24,15 +24,15 @@ const twitchWebhook = new TwitchWebhook({
     secret: 'It\'s a secret'
 })
 
-twitchWebhook.on('streams', ({ event }) => {
+twitchWebhook.on('streams', ({ topic, event }) => {
     console.log(event);
 })
 
-twitchWebhook.on('users/follows', ({ event }) => {
+twitchWebhook.on('users/follows', ({ topic, event }) => {
     console.log(event);
 })
 
-twitchWebhook.on('*', ({ event }) => {
+twitchWebhook.on('*', ({ topic, event }) => {
     console.log(event);
 })
 
