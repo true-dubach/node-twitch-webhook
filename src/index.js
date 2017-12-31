@@ -25,7 +25,7 @@ class TwitchWebhook extends EventEmitter {
    * @param {number} [options.lease_seconds] - Number of seconds until
    * the subscription expires.
    * @param {boolean|Object} [options.listen] - Listen options
-   * @param {string} [options.listen.autoStart=false] - Should automaticaly starts listening
+   * @param {string} [options.listen.autoStart=true] - Should automaticaly starts listening
    * @param {string} [options.listen.host="0.0.0.0"] - Host to bind to
    * @param {number} [options.listen.port=8443] - Port to bind to
    * @param {boolean|Object} [options.https=false] - Should use https connection.
@@ -71,7 +71,7 @@ class TwitchWebhook extends EventEmitter {
     this._server.on('error', this.emit.bind(this, 'error'))
     this._server.on('listening', this.emit.bind(this, 'listening'))
 
-    if (options.listen && options.listen.autoStart) {
+    if (options.listen.autoStart === undefined || options.listen.autoStart) {
       this.listen()
     }
   }

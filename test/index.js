@@ -27,8 +27,7 @@ describe('TwitchWebhook', () => {
       callback,
       listen: {
         host: '127.0.0.1',
-        port,
-        autoStart: true
+        port
       }
     })
 
@@ -37,7 +36,8 @@ describe('TwitchWebhook', () => {
       callback,
       listen: {
         host: '127.0.0.1',
-        port: freePort
+        port: freePort,
+        autoStart: false
       }
     })
   })
