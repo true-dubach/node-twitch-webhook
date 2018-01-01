@@ -19,8 +19,8 @@ const twitchWebhook = new TwitchWebhook({
   }
 })
 
-twitchWebhook.on('*', ({ topic, event }) => {
-  console.log(event)
+twitchWebhook.on('*', ({ topic, endpoint, event }) => {
+  console.log(topic, event)
 })
 
 twitchWebhook.subscribe('users/follows', {

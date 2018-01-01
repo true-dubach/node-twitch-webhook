@@ -2,11 +2,15 @@ const assert = require('assert')
 const request = require('request-promise')
 const errors = require('request-promise/errors')
 
-function checkResponseCode (requestOptions, requiredCode) {
+function sendRequest (requestOptions) {
   requestOptions.resolveWithFullResponse = true
   requestOptions.simple = false
 
-  return request(requestOptions).then(response => {
+  return request(requestOptions);
+}
+
+function checkResponseCode (requestOptions, requiredCode) {
+  return sendRequest(requestOptions).then(response => {
     assert.equal(
       response.statusCode,
       requiredCode,
@@ -38,6 +42,7 @@ function hasStoppedListening (url) {
 }
 
 module.exports = {
+  sendRequest,
   checkResponseCode,
   hasStartedListening,
   hasStoppedListening

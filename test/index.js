@@ -42,6 +42,34 @@ describe('TwitchWebhook', () => {
     })
   })
 
+  it('should contain errors', (done) => {
+    assert(twitchWebhook.errors instanceof Object);
+    done()
+  })
+
+  it('should throw FatalError if the Twitch Client ID is not provided', (done) => {
+    try {
+      let testWebhook = new TwitchWebhook();
+      done(new Error('expected error'))
+    } catch (err) {
+      assert(err instanceof errors.FatalError);
+      done()
+    }
+  })
+
+  it('should throw FatalError if the Callback URL is not provided', (done) => {
+    try {
+      let testWebhook = new TwitchWebhook({
+        client_id
+      });
+      done(new Error('expected error'))
+    } catch (err) {
+      assert(err instanceof errors.FatalError);
+      done()
+    }
+  })
+
+
   it('should automaticaly start listening by default', () => {
     assert.equal(twitchWebhook.isListening(), true)
     return helpers.hasStartedListening(`http://127.0.0.1:${port}`)
@@ -96,7 +124,7 @@ describe('TwitchWebhook', () => {
             )
             .then(response => {
               if (!response.body) {
-                throw new Error('expeced "hub.challenge"')
+                throw new Error('expected "hub.challenge"')
               }
             })
         })
@@ -138,14 +166,28 @@ describe('TwitchWebhook', () => {
         )
       })
 
+      it('returns 202 error code if topic is incorrect', () => {
+        return helpers.checkResponseCode(
+          {
+            url: `http://127.0.0.1:${port}`,
+            method: 'POST',
+            headers: {
+              link: '<https://api.twitch.tv/helix/>; rel="self"'
+            }
+          },
+          202
+        )
+      })
+
       it('returns 200 response code if everything is ok', () => {
         return helpers.checkResponseCode(
           {
             url: `http://127.0.0.1:${port}`,
             method: 'POST',
-            json: {
-              topic: 'https://api.twitch.tv/helix/users/follows?to_id=1337'
-            }
+            headers: {
+              link: '<https://api.twitch.tv/helix/users/follows?to_id=1337>; rel="self"'
+            },
+            json: {}
           },
           200
         )
@@ -165,6 +207,146 @@ describe('TwitchWebhook', () => {
         )
       })
     })
+  })
+
+  describe('events', () => {
+    it('emits "denied" event if request with denied status was received', (done) => {
+      twitchWebhook.once(
+        'denied',
+        () => done()
+      )
+      
+      helpers.sendRequest(
+        {
+          url: `http://127.0.0.1:${port}`,
+          qs: {
+            'hub.mode': 'denied',
+            'hub.topic': 'https://api.twitch.tv/helix/users/follows?to_id=1337',
+            'hub.reason': 'unauthorized'
+          }
+        }
+      );
+    })
+
+    it('emits "subscribe" event if the subscribe request was received', (done) => {
+      twitchWebhook.once(
+        'subscribe',
+        () => done()
+      )
+      
+      helpers.sendRequest(
+        {
+          url: `http://127.0.0.1:${port}`,
+          qs: {
+            'hub.mode': 'subscribe',
+            'hub.topic': 'https://api.twitch.tv/helix/users/follows?to_id=1337',
+            'hub.lease_seconds': 864000,
+            'hub.challenge': 'HzSGH_h04Cgl6VbDJm7IyXSNSlrhaLvBi9eft3bw'
+          }
+        }
+      );
+    })
+
+    it('emits "unsubscribe" event if the unsubscribe request was received', (done) => {
+      twitchWebhook.once(
+        'unsubscribe',
+        () => done()
+      )
+      
+      helpers.sendRequest(
+        {
+          url: `http://127.0.0.1:${port}`,
+          qs: {
+            'hub.mode': 'unsubscribe',
+            'hub.topic': 'https://api.twitch.tv/helix/users/follows?to_id=1337',
+            'hub.lease_seconds': 864000,
+            'hub.challenge': 'HzSGH_h04Cgl6VbDJm7IyXSNSlrhaLvBi9eft3bw'
+          }
+        }
+      );
+    })
+
+    it('emits "*" event if request with topic was received', (done) => {
+      twitchWebhook.once(
+        '*',
+        () => done()
+      )
+
+      helpers.sendRequest(
+        {
+          url: `http://127.0.0.1:${port}`,
+          method: 'POST',
+          headers: {
+            link: '<https://api.twitch.tv/helix/test>; rel="self"'
+          },
+          json: {}
+        }
+      )
+    })
+  })
+
+  describe('date fix', () => {
+    it('should fix "timestamp" field in "users/follows" topic', (done) => {
+      twitchWebhook.once('users/follows', ({event}) => {
+        assert(event.timestamp instanceof Date)
+        done()
+      })
+
+      helpers.sendRequest(
+        {
+          url: `http://127.0.0.1:${port}`,
+          method: 'POST',
+          headers: {
+            link: '<https://api.twitch.tv/helix/users/follows?to_id=1337>; rel="self"'
+          },
+          json: {
+            id: "436c70bb-a52f-4a6a-b4cc-6c57bc2ad227",
+            topic: "https://api.twitch.tv/helix/users/follows?to_id=1337",
+            type: "create",
+            data: {
+                from_id: 1336,
+                to_id: 1337
+            },
+            timestamp: "2017-08-07T13:52:14.403795077Z"
+          }
+        },
+        200
+      )
+    })
+
+    it('should fix "started_at" fields in "streams" topic', (done) => {
+      twitchWebhook.once('streams', ({event}) => {
+        for (let stream of event.data) {
+          assert(stream['started_at'] instanceof Date)
+        }
+      
+        done()
+      })
+
+      helpers.sendRequest(
+        {
+          url: `http://127.0.0.1:${port}`,
+          method: 'POST',
+          headers: {
+            link: '<https://api.twitch.tv/helix/streams?user_id=5678>; rel="self"'
+          },
+          json: {
+            data: [{
+              id: '0123456789',
+              user_id: 5678,
+              game_id: 21779,
+              community_ids: [],
+              type: 'live',
+              title: 'Best Stream Ever',
+              'viewer_count': 417,
+              'started_at': '2017-12-01T10:09:45Z',
+              language: 'en',
+              'thumbnail_url': 'https://link/to/thumbnail.jpg',
+            }]
+          }
+        }
+      )
+    })        
   })
 
   describe('#listen', () => {
@@ -199,27 +381,13 @@ describe('TwitchWebhook', () => {
     })
   })
 
-  describe.skip('#subscribe', () => {})
-
   describe('#unsubscribe', () => {
-    it('should throw FatalError if the request status is bad', function () {
+    it('should throw RequestDenied if the request status is bad', function () {
       this.timeout(timeout)
 
       return twitchWebhook.unsubscribe('streams').catch(err => {
-        assert(err instanceof errors.FatalError)
+        assert(err instanceof errors.RequestDenied)
       })
-    })
-
-    it('should throw RequestDenied if request status is denied', function () {
-      this.timeout(timeout)
-
-      return twitchWebhook
-        .unsubscribe('streams', {
-          user_id: 123
-        })
-        .catch(err => {
-          assert(err instanceof errors.RequestDenied)
-        })
     })
 
     it('should return nothing if everything is ok', function () {
@@ -227,6 +395,62 @@ describe('TwitchWebhook', () => {
 
       return twitchWebhook.unsubscribe('streams', {
         user_id: 123
+      })
+    })
+
+    it('should not supplement link if topic url is absolute', function () {
+      this.timeout(timeout)
+
+      return twitchWebhook.unsubscribe('https://api.twitch.tv/helix/streams', {
+        user_id: 123
+      })
+    })
+
+    it('should not supplement link if topic options is not exists', function () {
+      this.timeout(timeout)
+
+      return twitchWebhook.unsubscribe('https://api.twitch.tv/helix/streams?user_id=123')
+    })
+  })
+
+  describe('#subscribe', () => {
+    it('should throw RequestDenied if the request status is bad', function () {
+      this.timeout(timeout)
+
+      return twitchWebhook.subscribe('streams').catch(err => {
+        assert(err instanceof errors.RequestDenied)
+      })
+    })
+
+    it('should return nothing if everything is ok', function () {
+      this.timeout(timeout)
+
+      return twitchWebhook.subscribe('streams', {
+        user_id: 123
+      }).then(() => {
+        return twitchWebhook.unsubscribe('streams', {
+          user_id: 123
+        })
+      })
+    })
+
+    it('should not supplement link if topic url is absolute', function () {
+      this.timeout(timeout)
+
+      return twitchWebhook.subscribe('https://api.twitch.tv/helix/streams', {
+        user_id: 123
+      }).then(() => {
+        return twitchWebhook.unsubscribe('https://api.twitch.tv/helix/streams', {
+          user_id: 123
+        })
+      })
+    })
+
+    it('should not supplement link if topic options is not exists', function () {
+      this.timeout(timeout)
+
+      return twitchWebhook.subscribe('streams?user_id=123').then(() => {
+        return twitchWebhook.unsubscribe('streams?user_id=123')
       })
     })
   })
