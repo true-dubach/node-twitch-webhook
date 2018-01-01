@@ -31,8 +31,8 @@ twitchWebhook.subscribe('streams', {
   user_id: '12826'
 })
 
-process.on('exit', code => {
-  console.log(`Exit with code ${code}`)
+process.on('SIGINT', () => {
+  console.log(`SIGINT`)
 
   twitchWebhook.unsubscribe('users/follows', {
     to_id: '12826'
@@ -41,4 +41,6 @@ process.on('exit', code => {
   twitchWebhook.unsubscribe('streams', {
     user_id: '12826'
   })
+
+  process.exit(0)
 })
