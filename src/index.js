@@ -52,7 +52,7 @@ class TwitchWebhook extends EventEmitter {
     if (this._options.lease_seconds === undefined) {
       this._options.lease_seconds = 864000
     }
-    
+
     this._options.listen = options.listen || {}
     this._options.listen.host = options.listen.host || '0.0.0.0'
     this._options.listen.port = options.listen.port || 8443
