@@ -5,6 +5,8 @@ const assert = require('assert')
 const Promise = require('bluebird')
 const crypto = require('crypto')
 const url = require('url')
+const path = require('path')
+const fs = require('fs')
 
 const clientId = process.env.CLIENT_ID
 
@@ -12,7 +14,10 @@ if (!clientId) {
   throw new Error('Twitch Client ID not provided')
 }
 
-const callback = process.env.CALLBACK || 'https://216.58.210.174/' // Google IP :)
+let callback = process.env.CALLBACK || 'https://216.58.210.174/' // Google IP ¯\_(ツ)_/¯
+if (callback.substr(-1) !== '/') { // for full coverage ¯\_(ツ)_/¯
+  callback += '/'
+};
 
 let defaultPort = process.env.PORT || 9108
 const webhookPort = defaultPort++
@@ -141,7 +146,6 @@ describe('TwitchWebhook', () => {
     const tempWebhook = new TwitchWebhook({
       client_id: clientId,
       callback,
-      lease_seconds: 0,
       baseApiUrl: `http://127.0.0.1:${apiPort}`
     })
 
@@ -162,7 +166,6 @@ describe('TwitchWebhook', () => {
     const tempWebhook = new TwitchWebhook({
       client_id: clientId,
       callback: `http://127.0.0.1:${offlinePort}`,
-      lease_seconds: 0,
       baseApiUrl: `http://127.0.0.1:${apiPort}`
     })
 
@@ -177,6 +180,33 @@ describe('TwitchWebhook', () => {
         })
       })
       .finally(() => tempWebhook.close())
+  })
+
+  it('should create https server if "https" is defined', () => {
+    const key = fs.readFileSync(path.resolve('test/cert/key.pem'))
+    const cert = fs.readFileSync(path.resolve('test/cert/cert.pem'))
+
+    const httpsWebhook = new TwitchWebhook({
+      client_id: clientId,
+      callback,
+      listen: {
+        host: '127.0.0.1',
+        port: offlinePort
+      },
+      lease_seconds: 0,
+      https: {
+        key,
+        cert
+      }
+    })
+
+    return helpers.checkResponseCode(
+      {
+        url: `https://127.0.0.1:${offlinePort}`,
+        strictSSL: false
+      },
+      400
+    ).finally(() => httpsWebhook.close())
   })
 
   describe('webhook', () => {
