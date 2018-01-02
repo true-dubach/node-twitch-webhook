@@ -60,7 +60,12 @@ class TwitchWebhook extends EventEmitter {
     this._options.https = options.https || {}
 
     this._apiUrl = options.baseApiUrl || 'https://api.twitch.tv/helix/'
+    if (this._apiUrl.substr(-1) !== '/') {
+      this._apiUrl += '/'
+    }
+
     this._hubUrl = this._apiUrl + 'webhooks/hub'
+    this._apiPathname = url.parse(this._apiUrl).pathname
 
     this._secrets = {}
 
@@ -116,14 +121,8 @@ class TwitchWebhook extends EventEmitter {
       return Promise.resolve()
     }
 
-    return new Promise((resolve, reject) => {
-      this._server.close(err => {
-        if (err) {
-          return reject(err)
-        }
-
-        return resolve()
-      })
+    return new Promise(resolve => {
+      this._server.close(() => resolve())
     })
   }
 
@@ -168,7 +167,7 @@ class TwitchWebhook extends EventEmitter {
     }
     requestOptions.resolveWithFullResponse = true
     if (this._options.secret) {
-      let secret = crypto
+      const secret = crypto
         .createHmac('sha256', this._options.secret)
         .update(topic)
         .digest('hex')
@@ -237,7 +236,7 @@ class TwitchWebhook extends EventEmitter {
         break
       case 'unsubscribe':
         delete this._secrets[queries['hub.topic']] // Yes, it's needed by design
-      case "subscribe": // eslint-disable-line
+      case 'subscribe': // eslint-disable-line no-fallthrough
         response.writeHead(200, { 'Content-Type': 'text/plain' })
         response.end(queries['hub.challenge'])
 
@@ -282,8 +281,10 @@ class TwitchWebhook extends EventEmitter {
   _processUpdates (request, response) {
     const links = parseLinkHeader(request.headers.link)
     const endpoint = links && links.self && links.self.url
-    const topic = endpoint && url.parse(endpoint, true).pathname.replace('/helix/', '')
+    const topic = endpoint && url.parse(endpoint, true).pathname.replace(this._apiPathname, '')
+
     if (!endpoint || !topic) {
+      this.emit('webhook-error', new errors.WebhookError('Topic is missing or incorrect'))
       response.writeHead(202, { 'Content-Type': 'text/plain' })
       response.end()
       return
@@ -295,7 +296,8 @@ class TwitchWebhook extends EventEmitter {
         request.headers['x-hub-signature'] &&
         request.headers['x-hub-signature'].split('=')[1]
 
-      if (!signature) {
+      if (!signature || !this._secrets[endpoint]) {
+        this.emit('webhook-error', new errors.WebhookError('"x-hub-signature" is missing'))
         response.writeHead(202, { 'Content-Type': 'text/plain' })
         response.end()
         return
@@ -309,6 +311,7 @@ class TwitchWebhook extends EventEmitter {
       // Too much data, destroy the connection
       if (body.length > 1e6) {
         body = ''
+        this.emit('webhook-error', new errors.WebhookError('Request is very large'))
         response.writeHead(202, { 'Content-Type': 'text/plain' })
         response.end()
         request.connection.destroy()
@@ -320,21 +323,20 @@ class TwitchWebhook extends EventEmitter {
       try {
         data = JSON.parse(body)
       } catch (err) {
+        this.emit('webhook-error', new errors.WebhookError('JSON is malformed'))
         response.writeHead(202, { 'Content-Type': 'text/plain' })
         response.end()
         return
       }
 
       if (this._options.secret) {
-        let storedSign
-        if (this._secrets[endpoint]) {
-          storedSign = crypto
-            .createHmac('sha256', this._secrets[endpoint])
-            .update(body)
-            .digest('hex')
-        }
+        let storedSign = crypto
+          .createHmac('sha256', this._secrets[endpoint])
+          .update(body)
+          .digest('hex')
 
         if (storedSign !== signature) {
+          this.emit('webhook-error', new errors.WebhookError('"x-hub-signature" is incorrect'))
           response.writeHead(202, { 'Content-Type': 'text/plain' })
           response.end()
           return

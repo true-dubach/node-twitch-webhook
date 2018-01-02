@@ -1,13 +1,22 @@
 'use strict'
 
 /**
- * Twitch error
+ * Base error
+ *
  * @extends Error
  */
-class FatalError extends Error {
+class BaseError extends Error {}
+
+/**
+ * Library error
+ *
+ * @extends BaseError
+ */
+class FatalError extends BaseError {
   /**
+   * Constructs an instance of FatalError
    *
-   * @param {string|Error} error
+   * @param {string|Error} error - Error or error message
    */
   constructor (error) {
     if (error instanceof Error) {
@@ -22,21 +31,42 @@ class FatalError extends Error {
 
 /**
  * Access error
+ *
  * @extends FatalError
  */
 class RequestDenied extends FatalError {
   /**
+   * Constructs an instance of RequestDenied
    *
-   * @param {Object} response
+   * @param {Object} response - Response
    */
   constructor (response) {
-    super(`Invalid response status code ${response.statusCode}`)
+    super(response)
 
     this.response = response
   }
 }
 
+/**
+ * Webhook error
+ *
+ * @extends BaseError
+ */
+class WebhookError extends BaseError {
+  /**
+   * Constructs an instance of FatalError
+   *
+   * @param {string} message - Error message
+   */
+  constructor (message) {
+    super(message)
+    Error.captureStackTrace(this)
+  }
+}
+
 module.exports = {
+  BaseError,
   FatalError,
-  RequestDenied
+  RequestDenied,
+  WebhookError
 }
