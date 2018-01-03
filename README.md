@@ -36,15 +36,19 @@ const twitchWebhook = new TwitchWebhook({
 
 // set listener for all topics
 twitchWebhook.on('*', ({ topic, options, endpoint, event }) => {
-    console.log(topic)    // topic name, for example "stream"
-    console.log(options)  // topic options, for example "{user_id: 12826}"
-    // full topic URL, for example "https://api.twitch.tv/helix/streams?user_id=12826"
+    // topic name, for example "stream"
+    console.log(topic)
+    // topic options, for example "{user_id: 12826}"
+    console.log(options)
+    // full topic URL, for example 
+    // "https://api.twitch.tv/helix/streams?user_id=12826"
     console.log(endpoint)
-    console.log(event)    // topic data
+    // topic data
+    console.log(event)
 })
 
 // set listener for topic
-twitchWebhook.on('users/follows', ({ topic, options, endpoint, event }) => {
+twitchWebhook.on('users/follows', ({ event }) => {
     console.log(event)
 })
 
