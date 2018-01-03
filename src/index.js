@@ -21,9 +21,9 @@ class TwitchWebhook extends EventEmitter {
    * @param {string} options.client_id - Client ID required for Twitch API calls
    * @param {string} options.callback - URL where notifications
    * will be delivered.
-   * @param {string} [options.secret] - Secret used to sign
+   * @param {string} [options.secret=false] - Secret used to sign
    * notification payloads.
-   * @param {number} [options.lease_seconds] - Number of seconds until
+   * @param {number} [options.lease_seconds=864000] - Number of seconds until
    * the subscription expires.
    * @param {boolean|Object} [options.listen] - Listen options
    * @param {string} [options.listen.autoStart=true] - Should automaticaly starts listening
@@ -67,7 +67,7 @@ class TwitchWebhook extends EventEmitter {
     this._hubUrl = this._apiUrl + 'webhooks/hub'
     this._apiPathname = url.parse(this._apiUrl).pathname
 
-    this._secrets = {}
+    this._subscriptions = {}
 
     if (Object.keys(options.https).length) {
       this._server = https.createServer(
@@ -181,8 +181,9 @@ class TwitchWebhook extends EventEmitter {
         throw new errors.RequestDenied(err)
       })
       .then(response => {
+        this._subscriptions[topic] = {}
         if (this._options.secret) {
-          this._secrets[topic] = requestOptions.qs['hub.secret']
+          this._subscriptions[topic].secret = requestOptions.qs['hub.secret']
         }
       })
   }
@@ -200,14 +201,23 @@ class TwitchWebhook extends EventEmitter {
   }
 
   /**
-   * Unsubscribe from specific topic
+   * Unsubscribe from specific topic.
+   * "*" will unsubscribe from all topics that were subscribed on this session
    *
    * @param {string} topic - Topic name
    * @throws {RequestDenied} If hub finds any errors in the request
    * @return {Promise}
    */
   unsubscribe (topic, options = {}) {
-    return this._request('unsubscribe', topic, options)
+    if (topic !== '*') {
+      return this._request('unsubscribe', topic, options)
+    }
+
+    let poll = []
+    for (let topic of Object.keys(this._subscriptions)) {
+      poll.push(() => this._request('unsubscribe', topic))
+    }
+    return Promise.all(poll)
   }
 
   /**
@@ -235,12 +245,18 @@ class TwitchWebhook extends EventEmitter {
         this.emit('denied', queries)
         break
       case 'unsubscribe':
-        delete this._secrets[queries['hub.topic']] // Yes, it's needed by design
-      case 'subscribe': // eslint-disable-line no-fallthrough
+        delete this._subscriptions[queries['hub.topic']]
+
         response.writeHead(200, { 'Content-Type': 'text/plain' })
         response.end(queries['hub.challenge'])
 
-        this.emit(queries['hub.mode'], queries)
+        this.emit('unsubscribe', queries)
+        break
+      case 'subscribe':
+        response.writeHead(200, { 'Content-Type': 'text/plain' })
+        response.end(queries['hub.challenge'])
+
+        this.emit('subscribe', queries)
         break
       default:
         response.writeHead(400, { 'Content-Type': 'text/plain' })
@@ -281,7 +297,9 @@ class TwitchWebhook extends EventEmitter {
   _processUpdates (request, response) {
     const links = parseLinkHeader(request.headers.link)
     const endpoint = links && links.self && links.self.url
-    const topic = endpoint && url.parse(endpoint, true).pathname.replace(this._apiPathname, '')
+    const params = endpoint && url.parse(endpoint, true)
+    const topic = params && params.pathname.replace(this._apiPathname, '')
+    const options = params && params.query
 
     if (!endpoint || !topic) {
       this.emit('webhook-error', new errors.WebhookError('Topic is missing or incorrect'))
@@ -296,7 +314,7 @@ class TwitchWebhook extends EventEmitter {
         request.headers['x-hub-signature'] &&
         request.headers['x-hub-signature'].split('=')[1]
 
-      if (!signature || !this._secrets[endpoint]) {
+      if (!signature || !this._subscriptions[endpoint] || !this._subscriptions[endpoint].secret) {
         this.emit('webhook-error', new errors.WebhookError('"x-hub-signature" is missing'))
         response.writeHead(202, { 'Content-Type': 'text/plain' })
         response.end()
@@ -331,7 +349,7 @@ class TwitchWebhook extends EventEmitter {
 
       if (this._options.secret) {
         let storedSign = crypto
-          .createHmac('sha256', this._secrets[endpoint])
+          .createHmac('sha256', this._subscriptions[endpoint].secret)
           .update(body)
           .digest('hex')
 
@@ -348,6 +366,7 @@ class TwitchWebhook extends EventEmitter {
 
       let payload = {}
       payload.topic = topic
+      payload.options = options
       payload.endpoint = endpoint
       payload.event = this._fixDate(topic, data)
 

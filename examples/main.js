@@ -1,46 +1,45 @@
 const TwitchWebhook = require('twitch-webhook')
 
-const { CLIENT_ID, CALLBACK } = process.env
-
-if (!CLIENT_ID) {
+const clientId = process.env.CLIENT_ID
+if (!clientId) {
   throw new Error('Twitch Client ID not provided')
 }
-
-if (!CALLBACK) {
+const callback = process.env.CALLBACK
+if (!callback) {
   throw new Error('Callback URL not provided')
 }
 
 const twitchWebhook = new TwitchWebhook({
-  client_id: CLIENT_ID,
-  callback: CALLBACK,
+  client_id: clientId,
+  callback,
   secret: 'hello human Kappa',
   listen: {
     autoStart: true
   }
 })
 
-twitchWebhook.on('*', ({ topic, endpoint, event }) => {
-  console.log(topic, event)
+// set listener for all topics
+twitchWebhook.on('*', ({ topic, options, endpoint, event }) => {
+  console.log(topic, options, endpoint, event)
 })
 
+// subscribe to "users/follows" topic
 twitchWebhook.subscribe('users/follows', {
-  to_id: '12826'
+  to_id: '12826' // ID of Twitch Chanell ¯\_(ツ)_/¯
 })
-
+// subscribe to "streams" topic
 twitchWebhook.subscribe('streams', {
   user_id: '12826'
 })
 
+// renew the subscription when it expires
+twitchWebhook.on('unsubscibe', (obj) => {
+  twitchWebhook.subscribe(obj['hub.topic'])
+})
+
 process.on('SIGINT', () => {
-  console.log(`SIGINT`)
-
-  twitchWebhook.unsubscribe('users/follows', {
-    to_id: '12826'
-  })
-
-  twitchWebhook.unsubscribe('streams', {
-    user_id: '12826'
-  })
+  // unsubscribe from all topics
+  twitchWebhook.unsubscribe('*')
 
   process.exit(0)
 })

@@ -683,6 +683,39 @@ describe('TwitchWebhook', () => {
     })
   })
 
+  describe('#subscribe', () => {
+    it('should throw RequestDenied if the request status is bad', function () {
+      this.timeout(timeout)
+
+      return twitchWebhook.subscribe('streams').catch(err => {
+        assert(err instanceof errors.RequestDenied)
+        assert(typeof err.response === 'object')
+      })
+    })
+
+    it('should return nothing if everything is ok', function () {
+      this.timeout(timeout)
+
+      return twitchWebhook.subscribe('streams', {
+        user_id: 123
+      })
+    })
+
+    it('should not supplement link if topic url is absolute', function () {
+      this.timeout(timeout)
+
+      return twitchWebhook.subscribe('https://api.twitch.tv/helix/streams', {
+        user_id: 123
+      })
+    })
+
+    it('should not supplement link if topic options is not exists', function () {
+      this.timeout(timeout)
+
+      return twitchWebhook.subscribe('streams?user_id=123')
+    })
+  })
+
   describe('#unsubscribe', () => {
     it('should throw RequestDenied if the request status is bad', function () {
       this.timeout(timeout)
@@ -714,38 +747,15 @@ describe('TwitchWebhook', () => {
 
       return twitchWebhook.unsubscribe('https://api.twitch.tv/helix/streams?user_id=123')
     })
-  })
 
-  describe('#subscribe', () => {
-    it('should throw RequestDenied if the request status is bad', function () {
-      this.timeout(timeout)
-
-      return twitchWebhook.subscribe('streams').catch(err => {
-        assert(err instanceof errors.RequestDenied)
-        assert(typeof err.response === 'object')
-      })
-    })
-
-    it('should return nothing if everything is ok', function () {
+    it('should use saved topic links if topic name is "*"', function () {
       this.timeout(timeout)
 
       return twitchWebhook.subscribe('streams', {
         user_id: 123
-      })
-    })
-
-    it('should not supplement link if topic url is absolute', function () {
-      this.timeout(timeout)
-
-      return twitchWebhook.subscribe('https://api.twitch.tv/helix/streams', {
-        user_id: 123
-      })
-    })
-
-    it('should not supplement link if topic options is not exists', function () {
-      this.timeout(timeout)
-
-      return twitchWebhook.subscribe('streams?user_id=123')
+      }).catch((err) => {
+        throw new Error('unexpected error in #subscribe: ' + err.message)
+      }).then(() => twitchWebhook.unsubscribe('*'))
     })
   })
 

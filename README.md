@@ -9,46 +9,67 @@
 [![Read the Docs (version)](https://img.shields.io/readthedocs/pip/stable.svg)](https://true-dubach.github.io/node-twitch-webhook/)
 [![https://nodei.co/npm/twitch-webhook.png?downloads=true&downloadRank=true&stars=true](https://nodei.co/npm/twitch-webhook.png?downloads=true&downloadRank=true&stars=true)](https://www.npmjs.com/package/twitch-webhook)
 
-## Installation
+Little Node.js module to interact with new [Twitch Helix API Webhooks](https://dev.twitch.tv/docs/api/webhooks-reference).
 
-Install with NPM:
+## Install
 
-`npm install --save twitch-webhook`
+```bash
+npm install --save twitch-webhook
+```
 
 ## Usage
 
-```
+```js
 const TwitchWebhook = require('twitch-webhook')
 
 const twitchWebhook = new TwitchWebhook({
     client_id: 'Your Twitch Client ID',
     callback: 'Your Callback URL',
-    secret: 'It\'s a secret',
+    secret: 'It\'s a secret', // default: false
+    lease_seconds: 259200,    // default: 864000 (maximum value)
     listen: { 
-        port: 8080,         // default: 8443
-        host: '127.0.0.1',  // default: 0.0.0.0
-        autoStart: false    // default: true
+        port: 8080,           // default: 8443
+        host: '127.0.0.1',    // default: 0.0.0.0
+        autoStart: false      // default: true
     }
 })
 
-twitchWebhook.on('streams', ({ topic, endpoint, event }) => {
+// set listener for all topics
+twitchWebhook.on('*', ({ topic, options, endpoint, event }) => {
+    console.log(topic)    // topic name, for example "stream"
+    console.log(options)  // topic options, for example "{user_id: 12826}"
+    // full topic URL, for example "https://api.twitch.tv/helix/streams?user_id=12826"
+    console.log(endpoint)
+    console.log(event)    // topic data
+})
+
+// set listener for topic
+twitchWebhook.on('users/follows', ({ topic, options, endpoint, event }) => {
     console.log(event)
 })
 
-twitchWebhook.on('users/follows', ({ topic, endpoint, event }) => {
-    console.log(event)
-})
-
-twitchWebhook.on('*', ({ topic, endpoint, event }) => {
-    console.log(topic, event)
-})
-
+// subscribe to topic
 twitchWebhook.subscribe('users/follows', {
-    from_id: 'User id'
+    from_id: 12826 // ID of Twitch Channel ¯\_(ツ)_/¯
 })
 
-twitchWebhook.subscribe('streams', {
-    user_id: 'User id'
+// renew the subscription when it expires
+twitchWebhook.on('unsubscibe', (obj) => { 
+  twitchWebhook.subscribe(obj['hub.topic'])
+})
+
+// tell Twitch that we no longer listen
+// otherwise it will try to send events to a down app
+process.on('SIGINT', () => {
+  // unsubscribe from all topics
+  twitchWebhook.unsubscribe('*')
+
+  // or unsubscribe from each one individually
+  twitchWebhook.unsubscribe('users/follows', {
+    to_id: 12826
+  })
+
+  process.exit(0)
 })
 ```
 
