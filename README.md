@@ -19,6 +19,9 @@ npm install --save twitch-webhook
 
 ## Usage
 
+_**Note**: Twitch will return old payload for "users/follows" topic
+if `{first: 1}` is not specified_
+
 ```js
 const TwitchWebhook = require('twitch-webhook')
 
