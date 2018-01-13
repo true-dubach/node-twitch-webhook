@@ -275,7 +275,9 @@ class TwitchWebhook extends EventEmitter {
   _fixDate (topic, data) {
     switch (topic) {
       case 'users/follows':
-        data.timestamp = new Date(data.timestamp)
+        for (let follow of data.data) {
+          follow.followed_at = new Date(follow.followed_at)
+        }
         break
       case 'streams':
         for (let stream of data.data) {

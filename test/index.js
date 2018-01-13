@@ -606,9 +606,11 @@ describe('TwitchWebhook', () => {
   })
 
   describe('date fix', () => {
-    it('should fix "timestamp" field in "users/follows" topic', (done) => {
+    it('should fix "followed_at" field in "users/follows" topic', (done) => {
       twitchWebhook.once('users/follows', ({event}) => {
-        assert(event.timestamp instanceof Date)
+        for (let follow of event.data) {
+          assert(follow['followed_at'] instanceof Date)
+        }
         done()
       })
 
@@ -619,7 +621,11 @@ describe('TwitchWebhook', () => {
           link: '<https://api.twitch.tv/helix/users/follows?to_id=1337>; rel="self"'
         },
         json: {
-          timestamp: '2017-08-07T13:52:14.403795077Z'
+          data: [{
+            'followed_at': '2017-12-01T10:09:45Z'
+          }, {
+            'followed_at': '2017-12-02T11:49:47Z'
+          }]
         }
       })
     })
