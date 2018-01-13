@@ -27,7 +27,7 @@ const twitchWebhook = new TwitchWebhook({
     callback: 'Your Callback URL',
     secret: 'It\'s a secret', // default: false
     lease_seconds: 259200,    // default: 864000 (maximum value)
-    listen: { 
+    listen: {
         port: 8080,           // default: 8443
         host: '127.0.0.1',    // default: 0.0.0.0
         autoStart: false      // default: true
@@ -36,14 +36,14 @@ const twitchWebhook = new TwitchWebhook({
 
 // set listener for all topics
 twitchWebhook.on('*', ({ topic, options, endpoint, event }) => {
-    // topic name, for example "stream"
+    // topic name, for example "streams"
     console.log(topic)
     // topic options, for example "{user_id: 12826}"
     console.log(options)
-    // full topic URL, for example 
+    // full topic URL, for example
     // "https://api.twitch.tv/helix/streams?user_id=12826"
     console.log(endpoint)
-    // topic data
+    // topic data, timestamps are automatically converted to Date
     console.log(event)
 })
 
@@ -54,11 +54,12 @@ twitchWebhook.on('users/follows', ({ event }) => {
 
 // subscribe to topic
 twitchWebhook.subscribe('users/follows', {
+    first: 1,
     from_id: 12826 // ID of Twitch Channel ¯\_(ツ)_/¯
 })
 
 // renew the subscription when it expires
-twitchWebhook.on('unsubscibe', (obj) => { 
+twitchWebhook.on('unsubscibe', (obj) => {
   twitchWebhook.subscribe(obj['hub.topic'])
 })
 
@@ -70,6 +71,7 @@ process.on('SIGINT', () => {
 
   // or unsubscribe from each one individually
   twitchWebhook.unsubscribe('users/follows', {
+    first: 1,
     to_id: 12826
   })
 
@@ -79,4 +81,4 @@ process.on('SIGINT', () => {
 
 ## Documentation
 
-<a href="https://true-dubach.github.io/node-twitch-webhook">API Reference</a>
+[API Reference](https://true-dubach.github.io/node-twitch-webhook)

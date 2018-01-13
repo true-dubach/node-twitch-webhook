@@ -25,6 +25,7 @@ twitchWebhook.on('*', ({ topic, options, endpoint, event }) => {
 
 // subscribe to "users/follows" topic
 twitchWebhook.subscribe('users/follows', {
+  first: 1,
   to_id: '12826' // ID of Twitch Chanell ¯\_(ツ)_/¯
 })
 // subscribe to "streams" topic
