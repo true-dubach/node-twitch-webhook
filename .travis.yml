@@ -10,6 +10,7 @@ after_success:
   - jsdoc src
 deploy:
   provider: pages
+  skip-cleanup: true
   github_token: $GITHUB_TOKEN
   local_dir: out
   on:
