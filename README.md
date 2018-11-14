@@ -62,7 +62,7 @@ twitchWebhook.subscribe('users/follows', {
 })
 
 // renew the subscription when it expires
-twitchWebhook.on('unsubscibe', (obj) => {
+twitchWebhook.on('unsubscribe', (obj) => {
   twitchWebhook.subscribe(obj['hub.topic'])
 })
 
