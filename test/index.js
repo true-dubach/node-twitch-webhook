@@ -163,11 +163,13 @@ describe('TwitchWebhook', () => {
   })
 
   it('should add trailing slash to callback if it does not exist', () => {
+    console.log('dshauduhsauhdsauuhdasui')
     const tempWebhook = new TwitchWebhook({
       client_id: clientId,
       callback: `http://127.0.0.1:${offlinePort}`,
       baseApiUrl: `http://127.0.0.1:${apiPort}`
     })
+    console.log('dshauduhsauhdsauuhdasui2')
 
     tempWebhook.subscribe('test')
       .catch((err) => {

@@ -2,7 +2,7 @@ const errors = require('./errors')
 const crypto = require('crypto')
 const EventEmitter = require('events').EventEmitter
 const request = require('request-promise')
-const url = require('url')
+const URL = require('url').URL
 const http = require('http')
 const https = require('https')
 const qs = require('querystring')
@@ -65,7 +65,7 @@ class TwitchWebhook extends EventEmitter {
     }
 
     this._hubUrl = this._apiUrl + 'webhooks/hub'
-    this._apiPathname = url.parse(this._apiUrl).pathname
+    this._apiPathname = new URL(this._apiUrl).pathname
 
     this._subscriptions = {}
 
@@ -235,7 +235,7 @@ class TwitchWebhook extends EventEmitter {
    * @param {Object} response - Response
    */
   _processConnection (request, response) {
-    const queries = url.parse(request.url, true).query
+    const queries = new URL(request.url).searchParams
 
     switch (queries['hub.mode']) {
       case 'denied':
@@ -303,9 +303,9 @@ class TwitchWebhook extends EventEmitter {
   _processUpdates (request, response) {
     const links = parseLinkHeader(request.headers.link)
     const endpoint = links && links.self && links.self.url
-    const params = endpoint && url.parse(endpoint, true)
+    const params = endpoint && new URL(endpoint)
     const topic = params && params.pathname.replace(this._apiPathname, '')
-    const options = params && params.query
+    const options = params && params.searchParams
 
     if (!endpoint || !topic) {
       this.emit('webhook-error', new errors.WebhookError('Topic is missing or incorrect'))
