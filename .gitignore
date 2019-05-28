@@ -8,7 +8,7 @@ package-lock.json
 
 # Directories
 out
-node_modules/
+node_modules*
 .npm
 .eslintcache
 .vscode
